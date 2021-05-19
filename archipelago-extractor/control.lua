@@ -44,15 +44,15 @@ function dumpGameInfo()
     end
     game.write_file("recipes.json", game.table_to_json(data_collection), false)
     game.print("Exported Recipe Data")
-    -- data.raw can't be accessed from control.lua, need to find a better method
-    -- data_collection = {}
-    -- for machine_name, machine in pairs(data.raw["assembling_machine"]) do
-    --     local machine_data = {}
-    --     machine_data["categories"] = table.deepcopy(machine.crafting_categories)
-    --     data_collection[machine.name] = machine_data
-    -- end
-    -- game.write_file("machines.json", game.table_to_json(data_collection), false)
-    -- game.print("Exported Machine Data")
+    data_collection = {}
+    for _, proto in pairs(game.entity_prototypes) do
+        if proto.crafting_categories then
+            data_collection[proto.name] = proto.crafting_categories
+        end
+    end
+
+    game.write_file("machines.json", game.table_to_json(data_collection), false)
+    game.print("Exported Machine Data")
 end
 
 commands.add_command("ap-get-info-dump", "Dump Game Info, used by Archipelago.", function(call)
