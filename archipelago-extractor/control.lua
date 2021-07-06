@@ -23,24 +23,26 @@ function dumpGameInfo()
                 table.insert(ingredients, ingredient.name)
             end
             data_collection[tech_name] = tech_data
-
+            tech.researched = true -- enable all available recipes
         end
         game.write_file("techs.json", game.table_to_json(data_collection), false)
         game.print("Exported Tech Data")
     end
     data_collection = {}
     for recipe_name, recipe in pairs(force.recipes) do
-        local recipe_data = {}
-        recipe_data["ingredients"] = {}
-        recipe_data["products"] = {}
-        recipe_data["category"] = recipe.category
-        for _, ingredient in pairs(recipe.ingredients) do
-            table.insert(recipe_data["ingredients"], ingredient.name)
+        if recipe.enabled then
+            local recipe_data = {}
+            recipe_data["ingredients"] = {}
+            recipe_data["products"] = {}
+            recipe_data["category"] = recipe.category
+            for _, ingredient in pairs(recipe.ingredients) do
+                recipe_data["ingredients"][ingredient.name] = ingredient.amount
+            end
+            for _, product in pairs(recipe.products) do
+                recipe_data["products"][product.name] = product.amount
+            end
+            data_collection[recipe_name] = recipe_data
         end
-        for _, product in pairs(recipe.products) do
-            table.insert(recipe_data["products"], product.name)
-        end
-        data_collection[recipe_name] = recipe_data
     end
     game.write_file("recipes.json", game.table_to_json(data_collection), false)
     game.print("Exported Recipe Data")
