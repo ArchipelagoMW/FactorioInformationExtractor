@@ -35,6 +35,7 @@ function dumpGameInfo()
             recipe_data["ingredients"] = {}
             recipe_data["products"] = {}
             recipe_data["category"] = recipe.category
+            recipe_data["energy"] = recipe.energy
             for _, ingredient in pairs(recipe.ingredients) do
                 recipe_data["ingredients"][ingredient.name] = ingredient.amount
             end
