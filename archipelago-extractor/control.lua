@@ -11,7 +11,7 @@ function dumpGameInfo()
             tech_data["requires"] = requires
             local ingredients = {}
             tech_data["ingredients"] = ingredients
-            tech_data["has_effects"] = false
+            tech_data["has_modifier"] = false
             for tech_requirement, _ in pairs(tech.prerequisites) do
                 table.insert(requires, tech_requirement)
             end
@@ -19,7 +19,7 @@ function dumpGameInfo()
                 if modifier.type == "unlock-recipe" then
                     table.insert(unlocks, modifier.recipe)
                 else
-                    tech_data["has_effects"] = true
+                    tech_data["has_modifier"] = true
                 end
             end
             for _, ingredient in pairs(tech.research_unit_ingredients) do
