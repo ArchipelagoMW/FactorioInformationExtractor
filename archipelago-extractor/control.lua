@@ -1,7 +1,6 @@
-function dumpGameInfo()
-    -- dump Game Information that the Archipelago Randomizer needs.
+function dumpTechInfo(force)
     local data_collection = {}
-    local force = game.forces["player"]
+
     for tech_name, tech in pairs(force.technologies) do
         if tech.enabled and tech.research_unit_count_formula == nil then
             local tech_data = {}
@@ -31,6 +30,9 @@ function dumpGameInfo()
         game.write_file("techs.json", game.table_to_json(data_collection), false)
         game.print("Exported Tech Data")
     end
+end
+
+function dumpRecipeInfo(force)
     data_collection = {}
     for recipe_name, recipe in pairs(force.recipes) do
         if recipe.enabled then
@@ -50,6 +52,9 @@ function dumpGameInfo()
     end
     game.write_file("recipes.json", game.table_to_json(data_collection), false)
     game.print("Exported Recipe Data")
+end
+
+function dumpMachineInfo()
     data_collection = {}
     for _, proto in pairs(game.entity_prototypes) do
         if proto.crafting_categories or proto.resource_categories then
@@ -63,13 +68,14 @@ function dumpGameInfo()
                 data_collection[proto.name]["mining"] = {}
                 data_collection[proto.name]["mining"]["categories"] = proto.resource_categories
                 data_collection[proto.name]["mining"]["speed"] = proto.mining_speed
-                data_collection[proto.name]["mining"]["radius"] = proto.mining_drill_radius
             end
         end
     end
     game.write_file("machines.json", game.table_to_json(data_collection), false)
     game.print("Exported Machine Data")
-    
+end
+
+function dumpResourceInfo()
     data_collection = {}
     for _, proto in pairs(game.autoplace_control_prototypes) do
         if proto.category == "resource" then
@@ -88,22 +94,57 @@ function dumpGameInfo()
             resource["products"] = {}
             for _, product in pairs(minable.products) do
                 resource["products"][product.name] = {}
-                resource["products"][product.name]["type"] = product.type
+                -- resource["products"][product.name]["type"] = product.type
                 resource["products"][product.name]["name"] = product.name
-                resource["products"][product.name]["amount"] = product.amount
-                resource["products"][product.name]["amount_min"] = product.amount_min
-                resource["products"][product.name]["amount_max"] = product.amount_max
-                resource["products"][product.name]["probability"] = product.probability
-                resource["products"][product.name]["catalyst_amount"] = product.catalyst_amount
-                if product.type == "fluid" then
-                    resource["products"][product.name]["temperature"] = product.temperature
+                if product.amount then
+                    resource["products"][product.name]["amount"] = product.amount
+                else
+                    resource["products"][product.name]["amount"] = product.probability * (product.amount_min+product.amount_max)/2
                 end
+                resource["products"][product.name]["catalyst_amount"] = product.catalyst_amount
+                -- hopefully don't need this
+                -- if product.type == "fluid" then
+                --     resource["products"][product.name]["temperature"] = product.temperature
+                -- end
             end
             data_collection[proto.name] = resource
         end
     end
     game.write_file("resources.json", game.table_to_json(data_collection), false)
     game.print("Exported Minable Resource Data")
+end
+
+function dumpMachineInfo()
+    data_collection = {}
+    for _, proto in pairs(game.entity_prototypes) do
+        if proto.crafting_categories then
+            data_collection[proto.name] = proto.crafting_categories
+        end
+    end
+
+    game.write_file("machines.json", game.table_to_json(data_collection), false)
+    game.print("Exported Machine Data")
+end
+
+function dumpItemInfo()
+    data_collection = {}
+    for _, item in pairs(game.item_prototypes) do
+        data_collection[item.name] = item.stack_size
+    end
+
+    game.write_file("items.json", game.table_to_json(data_collection), false)
+    game.print("Exported Item Data")
+end
+
+function dumpGameInfo()
+    -- dump Game Information that the Archipelago Randomizer needs.
+    local force = game.forces["player"]
+    dumpTechInfo(force)
+    dumpRecipeInfo(force)
+    dumpResourceInfo()
+    dumpMachineInfo()
+    dumpItemInfo()
+
 end
 
 commands.add_command("ap-get-info-dump", "Dump Game Info, used by Archipelago.", function(call)
