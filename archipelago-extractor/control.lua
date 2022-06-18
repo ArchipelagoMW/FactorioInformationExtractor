@@ -136,6 +136,16 @@ function dumpItemInfo()
     game.print("Exported Item Data")
 end
 
+function dumpFluidInfo()
+    data_collection = {}
+    for _, item in pairs(game.fluid_prototypes) do
+        table.insert(data_collection, item.name)
+    end
+
+    game.write_file("fluids.json", game.table_to_json(data_collection), false)
+    game.print("Exported Fluid Data")
+end
+
 function dumpGameInfo()
     -- dump Game Information that the Archipelago Randomizer needs.
     local force = game.forces["player"]
@@ -144,7 +154,7 @@ function dumpGameInfo()
     dumpResourceInfo()
     dumpMachineInfo()
     dumpItemInfo()
-
+    dumpFluidInfo()
 end
 
 commands.add_command("ap-get-info-dump", "Dump Game Info, used by Archipelago.", function(call)
