@@ -71,13 +71,30 @@ function dumpTechInfo(force)
     end
 end
 
+function get_items_to_place_prototype(proto)
+	if proto.type == "character" then
+		return nil
+	end
+	if not proto.items_to_place_this then
+		return nil
+	end
+	items = {}
+	for _, item in pairs(proto.items_to_place_this) do
+		if type(item) == "string" then
+			items[item] = true
+		else
+			items[item.name] = true
+		end
+	end
+	return items
+end
+
 function dumpMachineInfo()
     data_collection = {}
     for _, proto in pairs(game.entity_prototypes) do
 		if proto.crafting_categories or proto.type == "character" then
 			data_collection[proto.name] = {}
 			data_collection[proto.name]["crafting"] = {} 
-			data_collection[proto.name]["crafting"]["type"] = proto.type
 			data_collection[proto.name]["crafting"]["speed"] = proto.crafting_speed or 1
 			data_collection[proto.name]["crafting"]["categories"] = proto.crafting_categories
 			data_collection[proto.name]["crafting"]["fixed_recipe"] = proto.fixed_recipe
@@ -97,14 +114,13 @@ function dumpMachineInfo()
 		if proto.resource_categories then
 			data_collection[proto.name] = data_collection[proto.name] or {}
 			data_collection[proto.name]["mining"] = {}
-			data_collection[proto.name]["mining"]["type"] = proto.type
 			data_collection[proto.name]["mining"]["categories"] = proto.resource_categories
 			data_collection[proto.name]["mining"]["speed"] = proto.mining_speed
 			data_collection[proto.name]["mining"]["input_fluid_box"] = false
 			data_collection[proto.name]["mining"]["output_fluid_box"] = false
 			for _, fluid_box in pairs(proto.fluidbox_prototypes) do
 				for _, connection in pairs(fluid_box.pipe_connections) do
-					if connection.type == "input-output" or connection.type == "input" then
+					if connection.type == "input-output" then
 						data_collection[proto.name]["mining"]["input_fluid_box"] = true
 					end
 					if connection.type == "output" then
@@ -121,25 +137,23 @@ function dumpMachineInfo()
 		if proto.fluid then
 			data_collection[proto.name] = {}
 			data_collection[proto.name]["offshore-pump"] = {}
-			data_collection[proto.name]["offshore-pump"]["type"] = proto.type
 			data_collection[proto.name]["offshore-pump"]["fluid"] = proto.fluid.name
 			data_collection[proto.name]["offshore-pump"]["speed"] = proto.pumping_speed
 		end
 		if proto.type == "boiler" then
 			local input_fluid = nil
 			local output_fluid = nil
-			for _, fluid_box in pairs(proto.fluidbox_prototypes) do
-				if fluid_box.production_type == "input-output" or fluid_box.production_type == "input" then
+			for index, fluid_box in pairs(proto.fluidbox_prototypes) do
+				if fluid_box.production_type == "input-output" then
 					input_fluid = fluid_box
 				end
 				if fluid_box.production_type == "output" then
 					output_fluid = fluid_box
 				end
 			end
-			if input_fluid and output_fluid  then
+			if input_fluid and output_fluid then
 				data_collection[proto.name] = {}
 				data_collection[proto.name]["boiler"] = {}
-				data_collection[proto.name]["boiler"]["type"] = proto.type
 				data_collection[proto.name]["boiler"]["input_fluid"] = input_fluid.filter.name
 				data_collection[proto.name]["boiler"]["output_fluid"] = output_fluid.filter.name
 				data_collection[proto.name]["boiler"]["target_temperature"] = proto.target_temperature
@@ -150,9 +164,13 @@ function dumpMachineInfo()
 			-- Only really care about burners that have at least one slot to store the burnt result.
 			data_collection[proto.name] = data_collection[proto.name] or {}
 			data_collection[proto.name]["fuel_burner"] = {}
-			data_collection[proto.name]["fuel_burner"]["type"] = proto.type
 			data_collection[proto.name]["fuel_burner"]["categories"] = proto.burner_prototype.fuel_categories
 			data_collection[proto.name]["fuel_burner"]["energy_usage"] = proto.max_energy_usage			
+		end
+		if data_collection[proto.name] then
+			data_collection[proto.name]["common"] = {}
+			data_collection[proto.name]["common"]["type"] = proto.type
+			data_collection[proto.name]["common"]["placeable_by"] = get_items_to_place_prototype(proto)
 		end
     end
     game.write_file("machines.json", game.table_to_json(data_collection), false)
@@ -236,7 +254,11 @@ function dumpFluidInfo()
     for _, item in pairs(game.fluid_prototypes) do
 		fluid = {}
 		fluid["default_temperature"] = item.default_temperature
-		fluid["max_temperature"] = item.max_temperature
+		if item.max_temperature == math.huge then
+			fluid["max_temperature"] = "inf"
+		else
+			fluid["max_temperature"] = item.max_temperature
+		end
 		fluid["heat_capacity"] = item.heat_capacity
         data_collection[item.name] = fluid
     end
