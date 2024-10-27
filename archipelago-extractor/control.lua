@@ -14,7 +14,7 @@ function dumpTechInfo(force)
             for tech_requirement, _ in pairs(tech.prerequisites) do
                 table.insert(requires, tech_requirement)
             end
-            for _, modifier in pairs(tech.effects) do
+            for _, modifier in pairs(tech.prototype.effects) do
                 if modifier.type == "unlock-recipe" then
                     table.insert(unlocks, modifier.recipe)
                 else
@@ -27,7 +27,7 @@ function dumpTechInfo(force)
             data_collection[tech_name] = tech_data
             tech.researched = true -- enable all available recipes
         end
-        game.write_file("techs.json", game.table_to_json(data_collection), false)
+        helpers.write_file("techs.json", helpers.table_to_json(data_collection), false)
         game.print("Exported Tech Data")
     end
 end
@@ -50,13 +50,13 @@ function dumpRecipeInfo(force)
             data_collection[recipe_name] = recipe_data
         end
     end
-    game.write_file("recipes.json", game.table_to_json(data_collection), false)
+    helpers.write_file("recipes.json", helpers.table_to_json(data_collection), false)
     game.print("Exported Recipe Data")
 end
 
 function dumpMachineInfo()
     data_collection = {}
-    for _, proto in pairs(game.entity_prototypes) do
+    for _, proto in pairs(prototypes.entity) do
         if proto.crafting_categories or proto.resource_categories then
             data_collection[proto.name] = {}
             if proto.crafting_categories then
@@ -71,15 +71,15 @@ function dumpMachineInfo()
             end
         end
     end
-    game.write_file("machines.json", game.table_to_json(data_collection), false)
+    helpers.write_file("machines.json", helpers.table_to_json(data_collection), false)
     game.print("Exported Machine Data")
 end
 
 function dumpResourceInfo()
     data_collection = {}
-    for _, proto in pairs(game.autoplace_control_prototypes) do
+    for _, proto in pairs(prototypes.autoplace_control) do
         if proto.category == "resource" then
-            local r_proto = game.entity_prototypes[proto.name]
+            local r_proto = prototypes.entity[proto.name]
             local minable = r_proto.mineable_properties
             local resource = {}
             resource["minable"] = minable.minable
@@ -110,39 +110,39 @@ function dumpResourceInfo()
             data_collection[proto.name] = resource
         end
     end
-    game.write_file("resources.json", game.table_to_json(data_collection), false)
+    helpers.write_file("resources.json", helpers.table_to_json(data_collection), false)
     game.print("Exported Minable Resource Data")
 end
 
 function dumpMachineInfo()
     data_collection = {}
-    for _, proto in pairs(game.entity_prototypes) do
+    for _, proto in pairs(prototypes.entity) do
         if proto.crafting_categories then
             data_collection[proto.name] = proto.crafting_categories
         end
     end
 
-    game.write_file("machines.json", game.table_to_json(data_collection), false)
+    helpers.write_file("machines.json", helpers.table_to_json(data_collection), false)
     game.print("Exported Machine Data")
 end
 
 function dumpItemInfo()
     data_collection = {}
-    for _, item in pairs(game.item_prototypes) do
+    for _, item in pairs(prototypes.item) do
         data_collection[item.name] = item.stack_size
     end
 
-    game.write_file("items.json", game.table_to_json(data_collection), false)
+    helpers.write_file("items.json", helpers.table_to_json(data_collection), false)
     game.print("Exported Item Data")
 end
 
 function dumpFluidInfo()
     data_collection = {}
-    for _, item in pairs(game.fluid_prototypes) do
+    for _, item in pairs(prototypes.fluid) do
         table.insert(data_collection, item.name)
     end
 
-    game.write_file("fluids.json", game.table_to_json(data_collection), false)
+    helpers.write_file("fluids.json", helpers.table_to_json(data_collection), false)
     game.print("Exported Fluid Data")
 end
 
