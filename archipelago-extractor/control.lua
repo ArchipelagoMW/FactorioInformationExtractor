@@ -3,13 +3,13 @@ function dumpTechInfo(force)
 
     for tech_name, tech in pairs(force.technologies) do
         if tech.enabled and tech.research_unit_count_formula == nil then
+			local tech_proto = tech.prototype
             local tech_data = {}
             local unlocks = {}
             tech_data["unlocks"] = unlocks
             local requires = {}
             tech_data["requires"] = requires
-            local ingredients = {}
-            tech_data["ingredients"] = ingredients
+
             tech_data["has_modifier"] = false
             for tech_requirement, _ in pairs(tech.prerequisites) do
                 table.insert(requires, tech_requirement)
@@ -21,9 +21,16 @@ function dumpTechInfo(force)
                     tech_data["has_modifier"] = true
                 end
             end
-            for _, ingredient in pairs(tech.research_unit_ingredients) do
-                table.insert(ingredients, ingredient.name)
-            end
+			
+			local ingredients = {}
+			tech_data["ingredients"] = ingredients
+			for _, ingredient in pairs(tech_proto.research_unit_ingredients) do
+				table.insert(ingredients, ingredient.name)
+			end
+			
+			if tech_proto.research_trigger then
+				tech_data["trigger"] = tech_proto.research_trigger
+			end
             data_collection[tech_name] = tech_data
             tech.researched = true -- enable all available recipes
         end
