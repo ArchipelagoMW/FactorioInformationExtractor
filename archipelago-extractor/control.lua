@@ -10,12 +10,15 @@ function dumpTechInfo(force)
             tech_data["requires"] = requires
             tech_data["infinite"] = tech.prototype.max_level == 4294967295
             tech_data["has_modifier"] = false
+            tech_data["unlocks-mining-with-fluid"] = false
             for tech_requirement, _ in pairs(tech.prerequisites) do
                 table.insert(requires, tech_requirement)
             end
             for _, modifier in pairs(tech.prototype.effects) do
                 if modifier.type == "unlock-recipe" then
                     table.insert(unlocks, modifier.recipe)
+                elseif modifier.type == "mining-with-fluid" and modifier.modifier == true then  -- It is possible that a mod might re-lock mining-with-fluid.
+                    tech_data["unlocks-mining-with-fluid"] = true
                 else
                     tech_data["has_modifier"] = true
                 end
