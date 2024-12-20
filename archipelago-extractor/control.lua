@@ -9,7 +9,7 @@ function dumpTechInfo(force)
             local requires = {}
             tech_data["requires"] = requires
             tech_data["infinite"] = tech.prototype.max_level == 4294967295
-            tech_data["has_modifier"] = false
+            local modifiers =  {}
             for tech_requirement, _ in pairs(tech.prerequisites) do
                 table.insert(requires, tech_requirement)
             end
@@ -17,8 +17,11 @@ function dumpTechInfo(force)
                 if modifier.type == "unlock-recipe" then
                     table.insert(unlocks, modifier.recipe)
                 else
-                    tech_data["has_modifier"] = true
+                    table.insert(modifiers, modifier.type)
                 end
+            end
+            if #modifiers > 0 then
+                tech_data["modifiers"] = modifiers
             end
             data_collection[tech_name] = tech_data
             tech.researched = true -- enable all available recipes
